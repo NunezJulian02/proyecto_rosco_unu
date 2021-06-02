@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+//import 'package:flutter/material.dart';
 
 // {} Creando El juego Rosco (Pasapalabra)
 import 'dart:html';
@@ -37,20 +37,20 @@ class Rosco {
   //const = indica que los valores no van a cambiar
   static List letras = const ["A", "B", "C", "D", "E", "F"];
   static List definiciones = const [
-    "Tripulante de un cohete espacial ",
-    "Animal asociado al mejor amigo del hombre",
-    "Representante de un pais",
-    "Animal terreste mas grande",
-    "bebida representativa de Argentina",
-    "Objeto utilizado para guardar lapices"
+    "Persona que tripula una Astronave o que estรก entrenada para este Trabajo",
+    "Especie de Talega o Saco de Tela y otro material que sirve para llevar o guardar algo",
+    "Aparato destinado a registrar imรกgenes animadas para el cine o la telivision",
+    "Obra literaria escrita para ser representada",
+    "Que se prolonga muchisimo o excesivamente",
+    "Laboratorio y despacho del farmaceutico"
   ];
   static List respuestas = [
     "Astronauta",
-    "Perro",
-    "Presidente",
-    "Elefante",
-    "Mate",
-    "Cartuchera"
+    "Bolsa",
+    "Camara",
+    "Drama",
+    "Eterno",
+    "Farmacia"
   ];
   //Creando el Constructor para Cargar las preguntas con valores
   Rosco() {
