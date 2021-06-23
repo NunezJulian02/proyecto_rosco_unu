@@ -14,3 +14,9 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter, view our
 [online documentation](https://flutter.dev/docs), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+
+                                        23/06/21
+desarrollado en Dartpad.
+El proyecto tiene un error de variable nula la cual no he podido solucionar, si desactivamos "null safety" a la hora de enviar nuestra respuesta nos saldra:
+
+"Uncaught TypeError: Cannot set property 'Symbol(dartx.text)' of nullError: TypeError: Cannot set property 'Symbol(dartx.text)' of null" 
