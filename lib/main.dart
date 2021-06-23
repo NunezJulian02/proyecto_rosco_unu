@@ -4,35 +4,83 @@
 import 'dart:html';
 import 'dart:collection';
 
-class Rosco {
+class Rosco implements Resultado {
   //Creando una lista del Tipo Pregunta (Char, int, etc)
   ListQueue<Pregunta> roscoPreguntas =
       ListQueue<Pregunta>(); //inicializando lista
+
+  List<String> respondidas = [];
+  List<String> pasadas = [];
+  int incorrectas = 0;
+  int correctas = 0;
+  int numPreguntas = 0;
+
   //Creando el Constructor para Cargar las preguntas con valores
   Rosco() {
     roscoPreguntas.addAll(RoscoApi().obtenerRoscos());
+    numPreguntas = roscoPreguntas.length;
   }
   //Creando el Retorno del metodo
   Pregunta obtenerPregunta(bool inicial) {
     if (inicial) return roscoPreguntas.first;
-    return null;
+
+    var siguientePregunta = roscoPreguntas.firstWhere(
+        (rosco) =>
+            !respondidas.any((x) => x == rosco.letra) &&
+            !pasadas.any((x) => x == rosco.letra),
+        orElse: () => null);
+
+    if (siguientePregunta == null) {
+      if (_puedoResetearRosco()) {
+        pasadas = [];
+        return obtenerPregunta(false);
+      } else {
+        return roscoPreguntas.last;
+      }
+    }
+    return siguientePregunta;
   }
 
   //Metodo
-  Pregunta pasapalabra() {
-    return Pregunta("", "", "");
+  Pregunta pasapalabra(String letraActual) {
+    var siguientePregunta = roscoPreguntas.firstWhere(
+        (rosco) =>
+            !(rosco.letra == letraActual) &&
+            !pasadas.any((x) => x == rosco.letra) &&
+            !respondidas.any((x) => x == rosco.letra),
+        orElse: () => null);
+    if (siguientePregunta == null) {
+      if (_puedoResetearRosco()) {
+        pasadas = [];
+        return pasapalabra("");
+      } else {
+        return roscoPreguntas.last;
+      }
+    }
+
+    pasadas.add(letraActual);
+    return siguientePregunta;
   }
 
   //Metodo
   String evaluarRespuesta(String letra, String respuesta) {
     //almacena la variable boolean de any
     //any busca variables iguales dentro de roscoPreguntas
-    var esCorrecta = roscoPreguntas
-        .any((rosco) => rosco.letra == letra && rosco.respuesta == respuesta);
+    var pregunta = roscoPreguntas.firstWhere((rosco) => rosco.letra == letra);
 
-    return esCorrecta
-        ? "Letra $letra respuesta correcta"
-        : "Letra $letra respuesta incorrecta"; //Otra forma de IF
+    respondidas.add(pregunta.letra);
+
+    if (pregunta.respuesta == respuesta) {
+      correctas++;
+      return "Letra $letra es correcta";
+    }
+    incorrectas++;
+    return "Letra $letra respuesta incorrecta";
+  }
+
+  bool _puedoResetearRosco() {
+    return roscoPreguntas
+        .any((rosco) => !respondidas.any((x) => x == rosco.letra));
   }
 }
 
@@ -93,6 +141,33 @@ class RoscoApi {
   }
 }
 
+abstract class Resultado {
+  int incorrectas;
+  int correctas;
+  int numPreguntas;
+}
+
+class RoscoEstado {
+  bool continuar = true;
+  bool continuarRosco(Resultado resultado) {
+    _evaluarRosco(resultado.correctas == resultado.numPreguntas,
+        "Felicidades Ganaste el Rosco");
+    _evaluarRosco(resultado.incorrectas == resultado.numPreguntas,
+        "Se acabo el Rosco :(");
+    _evaluarRosco(
+        resultado.correctas + resultado.incorrectas == resultado.numPreguntas,
+        "Se acabo el Rosco :(");
+    return continuar;
+  }
+
+  void _evaluarRosco(bool condicion, mensaje) {
+    if (condicion) {
+      continuar = false;
+      print(mensaje);
+    }
+  }
+}
+
 void main() {
   //Nos comunica con el HTML y demas clases
   //realizando una instancia de clase
@@ -114,6 +189,35 @@ void main() {
 
     //LLamando al metodo evaluarrespuesta
     String mensaje = rosco.evaluarRespuesta(letra, respuesta);
-    print(mensaje);
+
+    var roscoEstado = RoscoEstado();
+    if (roscoEstado.continuarRosco(rosco)) {
+      var nuevaPregunta = rosco.obtenerPregunta(false);
+      actualizarUI(nuevaPregunta);
+      print(mensaje);
+    } else {
+      desabilitar();
+    }
+  });
+
+  querySelector("#btnPasapalabra").onClick.listen((event) {
+    var roscoEstado = RoscoEstado();
+    if (roscoEstado.continuarRosco(rosco)) {
+      var nuevaPregunta = rosco.pasapalabra(querySelector("#letra").text);
+      actualizarUI(nuevaPregunta);
+    } else {
+      desabilitar();
+    }
   });
 } //Metodo
+
+void actualizarUI(Pregunta pregunta) {
+  querySelector("#letra").text = pregunta.letra;
+  querySelector("#pregunta").text = pregunta.definicion;
+  querySelector("#textrespuesta").text = " ";
+}
+
+void desabilitar() {
+  (querySelector("#btnEnviar") as ButtonElement).disabled = true;
+  (querySelector("#btnPasapalabra") as ButtonElement).disabled = true;
+}
